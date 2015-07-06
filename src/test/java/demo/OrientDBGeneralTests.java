@@ -145,7 +145,7 @@ public class OrientDBGeneralTests {
     }
 
     @Test
-    @Ignore
+    @Ignore("Disabled to prevent travis timeouts")
     public void testIndexAndStress() throws Exception {
         assertNotNull(orientGraphFactory);
 
