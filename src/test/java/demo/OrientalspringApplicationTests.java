@@ -36,19 +36,14 @@ public class OrientalspringApplicationTests extends AbstractJUnit4SpringContextT
         assertNotNull(graph);
 
         Map<String, Object> values = new HashMap<>();
-        try {
-            values.put("name", "Luca");
-            Vertex luca = graph.addVertex("class:Person", values);
-            values.put("name", "Marko");
-            Vertex marko = graph.addVertex("class:Person", values);
+        values.put("name", "Luca");
+        Vertex luca = graph.addVertex("class:Person", values);
+        values.put("name", "Marko");
+        Vertex marko = graph.addVertex("class:Person", values);
 
-            graph.commit();
+        graph.commit();
 
-            graph.addEdge(null, luca, marko, "knows");
-        } catch (Exception e) {
-            graph.rollback();
-            throw new RuntimeException(e);
-        }
+        graph.addEdge(null, luca, marko, "knows");
 
         Iterable<Vertex> vertices = graph.getVertices();
         assertNotNull(vertices);

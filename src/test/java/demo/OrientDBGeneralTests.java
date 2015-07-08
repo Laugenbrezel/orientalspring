@@ -6,11 +6,8 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.orient.spring.tx.OrientBlueprintsGraphFactory;
 import org.slf4j.Logger;
@@ -28,7 +25,8 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @ContextConfiguration(classes = OrientalspringApplication.class)
 @TestExecutionListeners({TransactionalTestExecutionListener.class})
@@ -77,8 +75,6 @@ public class OrientDBGeneralTests extends AbstractJUnit4SpringContextTests {
         newEdge = graph.addEdge("class:" + EdgeTypes.WORKS_AT, marko, obi, EdgeTypes.WORKS_AT);
         newEdge.setProperty("since", Date.from(LocalDate.of(2001, 1, 1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
 
-        graph.commit();
-
         Vertex person = graph.getVertexByKey(ModelClasses.PERSON + ".name", "Marko");
         assertNotNull(person);
         assertEquals("Marko", person.getProperty("name"));
@@ -110,49 +106,5 @@ public class OrientDBGeneralTests extends AbstractJUnit4SpringContextTests {
         graph.addVertex("class:" + ModelClasses.PERSON, values);
 
         graph.commit();
-        fail();
-    }
-
-    @Test
-    @Ignore("Disabled to prevent travis timeouts")
-    public void testIndexAndStress() throws Exception {
-        assertNotNull(orientGraphFactory);
-
-        OrientGraph graph = orientGraphFactory.graph();
-        assertNotNull(graph);
-
-        //TODO add departments
-        final long numberOfPersons = 500000L;
-        long idx = 0;
-        Map<String, Object> values = new HashMap<>();
-        StopWatch watch = new StopWatch();
-        watch.start();
-        while (idx < numberOfPersons) {
-            if (idx == 200007) {
-                values.put("name", "Captain Future");
-            } else {
-                values.put("name", RandomStringUtils.randomAlphabetic(14));
-            }
-            values.put("age", 77);
-            graph.addVertex("class:" + ModelClasses.PERSON, values);
-            idx++;
-            values.clear();
-
-            if (idx % 5000 == 0) {
-                graph.commit();
-                LOG.debug("## done " + idx + " / " + numberOfPersons + " ( " + ((double) idx / numberOfPersons) * 100 + "% )");
-            }
-        }
-        graph.commit();
-        watch.stop();
-        LOG.info("Time to save {} new Person vertices: {}", numberOfPersons, watch.toString());
-
-        watch.reset();
-        watch.start();
-        Vertex captain = graph.getVertexByKey(ModelClasses.PERSON + ".name", "Captain Future");
-        assertNotNull(captain);
-        watch.stop();
-        LOG.info("Time to find the Captain: {}", watch.toString());
-
     }
 }
